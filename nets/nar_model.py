@@ -124,6 +124,9 @@ class NARModel(nn.Module):
 
     def _init_embed(self, nodes):
         return self.init_embed(nodes)
+    
+    def get_node_embeddings(self, nodes, graph):
+        return self.embedder(self._init_embed(nodes), graph)
 
     def _inner(self, nodes, graph):
         """
