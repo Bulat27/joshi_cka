@@ -15,7 +15,7 @@ from torch.utils.data import DataLoader
 from utils.functions import parse_softmax_temperature
 from nets.nar_model import NARModel
 
-from correlation import fast_linear_CKA
+from correlation import fast_linear_CKA, linear_CKA
 
 import warnings
 warnings.filterwarnings("ignore", message="indexing with dtype torch.uint8 is now deprecated, please use a dtype torch.bool instead.")
@@ -181,9 +181,13 @@ def _eval_dataset(model, model2, dataset, decode_strategy, width, softmax_temp, 
     all_node_embeddings1 = np.vstack(all_node_embeddings1)
     all_node_embeddings2 = np.vstack(all_node_embeddings2)
 
-    cka_value = fast_linear_CKA(all_node_embeddings1, all_node_embeddings2)
+    cka_value_fast = fast_linear_CKA(all_node_embeddings1, all_node_embeddings2)
+    cka_value_regular = linear_CKA(all_node_embeddings1, all_node_embeddings2)
 
-    return cka_value
+    print(f"CKA value fast: {cka_value_fast}")
+    print(f"CKA value regular: {cka_value_regular}")
+
+    return cka_value_regular
 
 
     #             if decode_strategy == 'greedy':
