@@ -79,6 +79,55 @@ def eval_dataset(dataset_path, decode_strategy, width, softmax_temp, opts):
     return ""
 
 
+# def _eval_dataset(model, model2, dataset, decode_strategy, width, softmax_temp, opts, device):
+
+#     model.to(device)
+#     model.eval()
+
+#     model.set_decode_type(
+#         "greedy" if decode_strategy in ('bs', 'greedy') else "sampling",
+#         temp=softmax_temp
+#     )
+
+#     model2.to(device)
+#     model2.eval()
+
+#     model2.set_decode_type(
+#         "greedy" if decode_strategy in ('bs', 'greedy') else "sampling",
+#         temp=softmax_temp
+#     )
+
+#     dataloader = DataLoader(dataset, batch_size=opts.batch_size, shuffle=False, num_workers=opts.num_workers)
+
+#     results = []
+
+#     cka_values = []
+    
+#     for batch in tqdm(dataloader, disable=opts.no_progress_bar, ascii=True):
+#         # Optionally move Tensors to GPU
+#         nodes, graph = move_to(batch['nodes'], device), move_to(batch['graph'], device)
+
+#         start = time.time()
+#         with torch.no_grad():
+            
+#             if type(model) == NARModel:
+
+#                 if opts.cka:
+                    
+#                     node_embeddings1 = model.get_node_embeddings(nodes, graph)
+#                     node_embeddings2 = model2.get_node_embeddings(nodes, graph)
+
+#                     for i in range(opts.batch_size):
+#                         X = node_embeddings1[i].cpu().numpy()
+#                         Y = node_embeddings2[i].cpu().numpy()
+
+#                         cka_values.append(fast_linear_CKA(X, Y))
+
+#     average_cka = np.mean(cka_values)
+
+#     return average_cka
+
+
 def _eval_dataset(model, model2, dataset, decode_strategy, width, softmax_temp, opts, device):
 
     model.to(device)
@@ -107,7 +156,7 @@ def _eval_dataset(model, model2, dataset, decode_strategy, width, softmax_temp, 
     for batch in tqdm(dataloader, disable=opts.no_progress_bar, ascii=True):
         # Optionally move Tensors to GPU
         nodes, graph = move_to(batch['nodes'], device), move_to(batch['graph'], device)
-        
+
         start = time.time()
         with torch.no_grad():
             
@@ -118,11 +167,16 @@ def _eval_dataset(model, model2, dataset, decode_strategy, width, softmax_temp, 
                     node_embeddings1 = model.get_node_embeddings(nodes, graph)
                     node_embeddings2 = model2.get_node_embeddings(nodes, graph)
 
-                    node_embeddings1 = node_embeddings1.view(-1, node_embeddings1.size(-1)).cpu().numpy()
-                    node_embeddings2 = node_embeddings2.view(-1, node_embeddings2.size(-1)).cpu().numpy()
+                    # node_embeddings1 = node_embeddings1.view(-1, node_embeddings1.size(-1)).cpu().numpy()
+                    # node_embeddings2 = node_embeddings2.view(-1, node_embeddings2.size(-1)).cpu().numpy()
+                    graph_embeddings1 = node_embeddings1.view(node_embeddings1.size(0), -1).cpu().numpy()
+                    graph_embeddings2 = node_embeddings2.view(node_embeddings2.size(0), -1).cpu().numpy()
 
-                    all_node_embeddings1.append(node_embeddings1)
-                    all_node_embeddings2.append(node_embeddings2)
+                    # all_node_embeddings1.append(node_embeddings1)
+                    # all_node_embeddings2.append(node_embeddings2)
+
+                    all_node_embeddings1.append(graph_embeddings1)
+                    all_node_embeddings2.append(graph_embeddings2)
 
     all_node_embeddings1 = np.vstack(all_node_embeddings1)
     all_node_embeddings2 = np.vstack(all_node_embeddings2)
