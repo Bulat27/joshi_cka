@@ -182,12 +182,8 @@ def _eval_dataset(model, model2, dataset, decode_strategy, width, softmax_temp, 
     all_node_embeddings2 = np.vstack(all_node_embeddings2)
 
     cka_value_fast = fast_linear_CKA(all_node_embeddings1, all_node_embeddings2)
-    cka_value_regular = linear_CKA(all_node_embeddings1, all_node_embeddings2)
-
-    print(f"CKA value fast: {cka_value_fast}")
-    print(f"CKA value regular: {cka_value_regular}")
-
-    return cka_value_regular
+    
+    return cka_value_fast
 
 
     #             if decode_strategy == 'greedy':
